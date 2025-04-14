@@ -5,6 +5,7 @@ from .views import (
     LogInAPIView,
     RequestPasswordResetAPIView,
     ResetPasswordAPIView,
+    ResetPasswordPageView,
 )
 
 urlpatterns = [
@@ -17,7 +18,7 @@ urlpatterns = [
     ),
     path(
         "reset-password/<str:token>/",
-        ResetPasswordAPIView.as_view(),
+        ResetPasswordPageView.as_view(),
         name="reset_password",
     ),
 ]

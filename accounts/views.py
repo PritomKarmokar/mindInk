@@ -2,11 +2,13 @@ from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.request import Request
 from rest_framework.response import Response
-from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.permissions import AllowAny
+from rest_framework.renderers import StaticHTMLRenderer
+from rest_framework_simplejwt.tokens import RefreshToken
 
+from django.shortcuts import render
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
-from rest_framework_simplejwt.tokens import RefreshToken
 
 from mindInk.settings import BASE_URL
 from .models import User, PasswordReset
@@ -87,6 +89,9 @@ class RequestPasswordResetAPIView(APIView):
 
                 reset_url = f"{BASE_URL}/auth/reset-password/{token}/"
 
+                print(f"reset url: {reset_url}")
+
+                # todo: email sending functionalities
                 return Response(
                     data={
                         "reset_url": reset_url,
@@ -134,3 +139,52 @@ class ResetPasswordAPIView(APIView):
             data=serializer.errors,
             status=status.HTTP_400_BAD_REQUEST,
         )
+
+
+class ResetPasswordPageView(APIView):
+    permission_classes = (AllowAny,)
+    renderer_classes = [StaticHTMLRenderer]
+
+    def get(self, request: Request, token: str):
+        reset_obj = PasswordReset.objects.filter(token=token).first()
+
+        if not reset_obj:
+            return render(request, "password_reset/404.html")
+
+        return render(request, "password_reset/reset_form.html")
+
+    def post(self, request: Request, token: str) -> Response:
+        response_data = request.POST.dict()
+        reset_obj = PasswordReset.objects.filter(token=token).first()
+
+        if not reset_obj:
+            return render(request, "password_reset/404.html")
+
+        new_password = response_data.get("new_password").strip()
+        confirm_password = response_data.get("confirm_password").strip()
+
+        errors = []
+        if not new_password:
+            errors.append("New password is required")
+
+        if not confirm_password:
+            errors.append("Confirm password is required")
+
+        if new_password != confirm_password:
+            errors.append("Passwords don't match")
+
+        if errors:
+            context = {"errors": errors}
+            return render(request, "password_reset/reset_form.html", context)
+
+        user = User.objects.get(email=reset_obj.email)
+
+        if user:
+            user.set_password(new_password)
+            user.save()
+
+            reset_obj.delete()
+
+            return render(request, "password_reset/success.html")
+        else:
+            return render(request, "password_reset/404.html")
