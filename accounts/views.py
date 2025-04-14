@@ -3,7 +3,7 @@ from rest_framework.views import APIView
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny
-from rest_framework.renderers import StaticHTMLRenderer
+from rest_framework.renderers import StaticHTMLRenderer, TemplateHTMLRenderer
 from rest_framework_simplejwt.tokens import RefreshToken
 
 from django.shortcuts import render
@@ -143,22 +143,22 @@ class ResetPasswordAPIView(APIView):
 
 class ResetPasswordPageView(APIView):
     permission_classes = (AllowAny,)
-    renderer_classes = [StaticHTMLRenderer]
+    renderer_classes = [TemplateHTMLRenderer]
 
-    def get(self, request: Request, token: str):
+    def get(self, request: Request, token: str) -> Response:
         reset_obj = PasswordReset.objects.filter(token=token).first()
 
         if not reset_obj:
-            return render(request, "password_reset/404.html")
+            return Response(template_name="password_reset/404.html")
 
-        return render(request, "password_reset/reset_form.html")
+        return Response(template_name="password_reset/reset_form.html")
 
     def post(self, request: Request, token: str) -> Response:
         response_data = request.POST.dict()
         reset_obj = PasswordReset.objects.filter(token=token).first()
 
         if not reset_obj:
-            return render(request, "password_reset/404.html")
+            return Response(template_name="password_reset/404.html")
 
         new_password = response_data.get("new_password").strip()
         confirm_password = response_data.get("confirm_password").strip()
@@ -175,7 +175,7 @@ class ResetPasswordPageView(APIView):
 
         if errors:
             context = {"errors": errors}
-            return render(request, "password_reset/reset_form.html", context)
+            return Response(context, template_name="password_reset/reset_form.html")
 
         user = User.objects.get(email=reset_obj.email)
 
@@ -185,6 +185,6 @@ class ResetPasswordPageView(APIView):
 
             reset_obj.delete()
 
-            return render(request, "password_reset/success.html")
+            return Response(template_name="password_reset/success.html")
         else:
-            return render(request, "password_reset/404.html")
+            return Response(template_name="password_reset/404.html")
