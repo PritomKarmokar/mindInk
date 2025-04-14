@@ -171,3 +171,5 @@ SIMPLE_JWT = {
     "JTI_CLAIM": "jti",
 }
 # Simple JWT settings end
+
+BASE_URL = env.str("BASE_URL")

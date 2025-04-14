@@ -44,3 +44,9 @@ class User(AbstractUser):
 
     class Meta:
         verbose_name = "User"
+
+
+class PasswordReset(models.Model):
+    email = models.EmailField()
+    token = models.CharField(max_length=100)
+    created_at = models.DateTimeField(default=timezone.now)

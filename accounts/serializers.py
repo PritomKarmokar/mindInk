@@ -36,3 +36,21 @@ class SignupSerializer(serializers.ModelSerializer):
 class LogInSerializer(serializers.Serializer):
     email = serializers.CharField(max_length=255)
     password = serializers.CharField(min_length=5)
+
+
+class ResetPasswordRequestSerializer(serializers.Serializer):
+    email = serializers.EmailField(required=True)
+
+
+class ResetPasswordSerializer(serializers.Serializer):
+    new_password = serializers.CharField(write_only=True, required=True)
+    confirm_password = serializers.CharField(write_only=True, required=True)
+
+    def validate(self, attrs):
+        new_password = attrs["new_password"]
+        confirm_password = attrs["confirm_password"]
+
+        if new_password != confirm_password:
+            raise ValidationError("Passwords don't match")
+
+        return attrs
