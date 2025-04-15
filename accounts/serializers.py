@@ -54,3 +54,7 @@ class ResetPasswordSerializer(serializers.Serializer):
             raise ValidationError("Passwords don't match")
 
         return attrs
+
+
+class LogOutSerializer(serializers.Serializer):
+    refresh_token = serializers.CharField(max_length=255)

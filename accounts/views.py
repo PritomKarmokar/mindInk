@@ -2,9 +2,9 @@ from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.request import Request
 from rest_framework.response import Response
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.renderers import StaticHTMLRenderer, TemplateHTMLRenderer
-from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework_simplejwt.tokens import RefreshToken, TokenError
 
 from django.shortcuts import render
 from django.contrib.auth import authenticate, login, logout
@@ -15,6 +15,7 @@ from .models import User, PasswordReset
 from .serializers import (
     SignupSerializer,
     LogInSerializer,
+    LogOutSerializer,
     ResetPasswordSerializer,
     ResetPasswordRequestSerializer,
 )
@@ -188,3 +189,29 @@ class ResetPasswordPageView(APIView):
             return Response(template_name="password_reset/success.html")
         else:
             return Response(template_name="password_reset/404.html")
+
+
+class LogoutAPIView(APIView):
+    permission_classes = (IsAuthenticated,)
+    serializer_class = LogOutSerializer
+
+    def post(self, request: Request) -> Response:
+        try:
+            serializer = self.serializer_class(data=request.data)
+            if serializer.is_valid():
+                refresh = serializer.data["refresh_token"]
+                token = RefreshToken(refresh)
+                token.blacklist()
+
+                response = {"message": "Successfully logged out"}
+                return Response(data=response, status=status.HTTP_204_NO_CONTENT)
+            else:
+                return Response(
+                    data=serializer.errors, status=status.HTTP_400_BAD_REQUEST
+                )
+
+        except TokenError:
+
+            return Response(
+                {"detail": "Invalid token."}, status=status.HTTP_400_BAD_REQUEST
+            )
