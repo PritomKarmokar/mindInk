@@ -11,7 +11,13 @@ class NotesListCreateAPIView(APIView):
     serializer_class = NoteSerializer
 
     def get(self, request: Request) -> Response:
-        return Response({})
+        notes = Note.objects.filter(user=request.user)
+        serializer = self.serializer_class(notes, many=True)
+        response = {
+            "message": f"Currently Available Notes for {request.user.username}",
+            "notes": serializer.data,
+        }
+        return Response(data=response, status=status.HTTP_200_OK)
 
     def post(self, request: Request) -> Response:
         serializer = self.serializer_class(data=request.data)
@@ -22,7 +28,7 @@ class NotesListCreateAPIView(APIView):
 
             response = {
                 "message": "New Note Created Successfully!",
-                "data": serializer.data
+                "data": serializer.data,
             }
             return Response(data=response, status=status.HTTP_201_CREATED)
 
