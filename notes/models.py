@@ -12,11 +12,16 @@ User = get_user_model()
 
 
 class NoteObjectManager(models.Manager):
-    def create_new_note(self, user: User, validated_data: dict) -> typing.Optional["Note"]:
+    def create_new_note(
+        self, user: User, validated_data: dict
+    ) -> typing.Optional["Note"]:
         try:
             return self.create(user=user, **validated_data)
         except Exception as e:
-            logger.error({"response": "Note object init failed", "errors": repr(e)}, exc_info=True)
+            logger.error(
+                {"response": "Note object init failed", "errors": repr(e)},
+                exc_info=True,
+            )
             raise Exception("Note object init failed")
 
 
@@ -31,3 +36,8 @@ class Note(models.Model):
 
     def __str__(self):
         return f"{self.title}"
+
+    class Meta:
+        verbose_name = "Notes"
+        verbose_name_plural = "Notes List"
+        db_table = "notes"

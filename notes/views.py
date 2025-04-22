@@ -33,3 +33,15 @@ class NotesListCreateAPIView(APIView):
             return Response(data=response, status=status.HTTP_201_CREATED)
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class NotesRetrieveUpdateDeleteAPIView(APIView):
+
+    def get(self, request: Request) -> Response:
+        pass
+
+    def put(self, request: Request) -> Response:
+        pass
+
+    def delete(self, request: Request) -> Response:
+        pass
