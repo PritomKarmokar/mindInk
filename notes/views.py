@@ -15,14 +15,15 @@ class NotesListCreateAPIView(APIView):
 
     def post(self, request: Request) -> Response:
         serializer = self.serializer_class(data=request.data)
-        user = request.user
-        print(user)
+        current_user = request.user
 
         if serializer.is_valid():
-            new_note = Note.objects.create_new_note(user, serializer.validated_data)
+            _ = Note.objects.create_new_note(current_user, serializer.validated_data)
+
             response = {
-                "note": new_note
-            }  # todo: throws error that `note data` is not json serializable
-            return Response(data=serializer.data, status=status.HTTP_201_CREATED)
+                "message": "New Note Created Successfully!",
+                "data": serializer.data
+            }
+            return Response(data=response, status=status.HTTP_201_CREATED)
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
