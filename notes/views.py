@@ -1,3 +1,5 @@
+from django.utils import timezone
+
 from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.request import Request
@@ -11,8 +13,8 @@ class NotesListCreateAPIView(APIView):
     serializer_class = NoteSerializer
 
     def get(self, request: Request) -> Response:
-        notes = Note.objects.filter(user=request.user)
-        serializer = self.serializer_class(notes, many=True)
+        notes = Note.objects.get_note_object_list(user=request.user)
+        serializer = self.serializer_class(instance=notes, many=True)
         response = {
             "message": f"Currently Available Notes for {request.user.username}",
             "notes": serializer.data,
@@ -36,12 +38,58 @@ class NotesListCreateAPIView(APIView):
 
 
 class NotesRetrieveUpdateDeleteAPIView(APIView):
+    serializer_class = NoteSerializer
 
-    def get(self, request: Request) -> Response:
-        pass
+    def get(self, request: Request, note_id: int) -> Response:
+        note = Note.objects.get_note_object(note_id=note_id)
+        if note:
+            serializer = self.serializer_class(note)
+            response = {
+                "message": f"Note with the following ID {note_id} was Retrieved Successfully!",
+                "data": serializer.data,
+            }
+            return Response(data=response, status=status.HTTP_200_OK)
+        else:
+            response = {
+                "message": f"Note with the following ID {note_id} does not exist",
+            }
+            return Response(data=response, status=status.HTTP_404_NOT_FOUND)
 
-    def put(self, request: Request) -> Response:
-        pass
+    def patch(self, request: Request, note_id: int) -> Response:
+        title = request.data.get("title", None)
+        content = request.data.get("content", None)
 
-    def delete(self, request: Request) -> Response:
-        pass
+        note = Note.objects.get(id=note_id)
+
+        if not note:
+            response = {
+                "message": f"Note with the following ID {note_id} does not exist",
+            }
+            return Response(data=response, status=status.HTTP_404_NOT_FOUND)
+
+        if not title and not content:
+            error_response = {
+                "message": "title or content is required. both values cannot be None"
+            }
+            return Response(data=error_response, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            _ = note.update_model(title=title, content=content)
+            response = {
+                "message": f"Note with the ID {note_id} Updated Successfully!",
+            }
+            return Response(data=response, status=status.HTTP_200_OK)
+
+    def delete(self, request: Request, note_id: int) -> Response:
+        note = Note.objects.get(id=note_id)
+        if not note:
+            response = {
+                "message": f"Note with the following ID {note_id} does not exist",
+            }
+            return Response(data=response, status=status.HTTP_404_NOT_FOUND)
+
+        note.delete_model()
+
+        response = {
+            "message": f"Note with the ID {note_id} Deleted Successfully!",
+        }
+        return Response(data=response, status=status.HTTP_204_NO_CONTENT)
