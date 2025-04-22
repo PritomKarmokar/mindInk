@@ -1,4 +1,7 @@
 import logging
+import typing
+
+from typing import Any, Dict
 
 from django.db import models
 from django.contrib.auth import get_user_model
@@ -9,11 +12,12 @@ User = get_user_model()
 
 
 class NoteObjectManager(models.Manager):
-    def create_new_note(self, user, serializer):
+    def create_new_note(self, user: User, validated_data: dict) -> typing.Optional["Note"]:
         try:
-            return self.create(user=user, **serializer)
+            return self.create(user=user, **validated_data)
         except Exception as e:
-            logger.error({"response": "Note object init failed", "errors": repr(e)})
+            logger.error({"response": "Note object init failed", "errors": repr(e)}, exc_info=True)
+            raise Exception("Note object init failed")
 
 
 class Note(models.Model):
