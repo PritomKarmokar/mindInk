@@ -4,6 +4,7 @@ from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.request import Request
 from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticated
 
 from notes.models import Note
 from notes.serializers import NoteSerializer
@@ -11,6 +12,7 @@ from notes.serializers import NoteSerializer
 
 class NotesListCreateAPIView(APIView):
     serializer_class = NoteSerializer
+    permission_classes = (IsAuthenticated,)
 
     def get(self, request: Request) -> Response:
         notes_list = Note.objects.get_note_object_list(user=request.user)
@@ -45,6 +47,7 @@ class NotesListCreateAPIView(APIView):
 
 class NotesRetrieveUpdateDeleteAPIView(APIView):
     serializer_class = NoteSerializer
+    permission_classes = (IsAuthenticated,)
 
     def get(self, request: Request, note_id: int) -> Response:
         note = Note.objects.get_note_object(note_id=note_id)
