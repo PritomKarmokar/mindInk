@@ -5,7 +5,6 @@ from rest_framework.views import status
 from rest_framework.test import APITestCase
 
 from notes.models import Note
-from notes.serializers import NoteSerializer
 
 User = get_user_model()
 
@@ -20,6 +19,7 @@ class BaseViewTest(APITestCase):
         self.signup()
         self.login_user()
         self.user = self.get_user_instance()
+        self.note_object = self.create_note("Golang", "Adding CheatSheet", self.user)
 
     def signup(self):
         response = self.client.post(
@@ -45,16 +45,15 @@ class BaseViewTest(APITestCase):
     def get_user_instance(self):
         return User.objects.get(username=self.user_data["username"])
 
+    def create_note(self, title: str, content: str, user: User):
+        if title and content and user:
+            return Note.objects.create(title=title, content=content, user=user)
+
 
 class NotesCreateListAPITestCase(BaseViewTest):
     def setUp(self):
         super().setUp()
         self.url = reverse("notes-create-or-list")
-        self.create_note("Golang", "Adding CheatSheet", self.user)
-
-    def create_note(self, title: str, content: str, user: User):
-        if title and content and user:
-            Note.objects.create(title=title, content=content, user=user)
 
     def test_create_note(self):
         payload = {
@@ -69,3 +68,34 @@ class NotesCreateListAPITestCase(BaseViewTest):
         response = self.client.get(self.url)
         # print(f"response.data: {response.data}")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+
+class NotesRetrieveUpdateDeleteAPITestCase(BaseViewTest):
+    def setUp(self):
+        super().setUp()
+        self.url = reverse(
+            "notes-retrieve-update-delete", kwargs={"note_id": self.note_object.id}
+        )
+
+    def test_retrieve_note(self):
+        response = self.client.get(
+            self.url,
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data["data"]["title"], "Golang")
+
+    def test_update_note(self):
+        new_title = {
+            "title": "Golang Updated",
+        }
+
+        response = self.client.patch(self.url, new_title)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.note_object.refresh_from_db()  # reloads the note object from the DB after patch
+        self.assertEqual(self.note_object.title, new_title["title"])
+
+    def test_delete_note(self):
+        response = self.client.delete(self.url)
+
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)

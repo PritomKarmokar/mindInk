@@ -4,10 +4,21 @@ from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.request import Request
 from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny
 
 from notes.models import Note
 from notes.serializers import NoteSerializer
+
+
+class NoteHomeAPIView(APIView):
+    permission_classes = (IsAuthenticated,)
+
+    def get(self, request):
+        user = request.user
+        response = {
+            "message": f"Hello, {user.username}",
+        }
+        return Response(data=response, status=status.HTTP_200_OK)
 
 
 class NotesListCreateAPIView(APIView):
