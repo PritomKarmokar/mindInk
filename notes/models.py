@@ -22,7 +22,7 @@ class NoteObjectManager(models.Manager):
                 {"response": "Note object init failed", "errors": repr(e)},
                 exc_info=True,
             )
-            raise Exception("Note object init failed")
+            return None
 
     def get_note_object(self, note_id: int) -> typing.Optional["Note"]:
         try:
@@ -31,14 +31,14 @@ class NoteObjectManager(models.Manager):
             logger.error(
                 {"response": "Note object fetch failed", "errors": repr(e)},
             )
-            raise Exception("Note object fetch failed")
+            return None
 
     def get_note_object_list(self, user: User) -> typing.Optional[QuerySet]:
         try:
             return self.filter(user=user, is_active=True)
         except Exception as e:
             logger.error("Note list fetch failed. Errors: ", repr(e))
-            raise Exception("Note list fetch failed")
+            return None
 
 
 class Note(models.Model):
@@ -60,7 +60,7 @@ class Note(models.Model):
         verbose_name_plural = "Notes List"
         db_table = "notes"
 
-    def update_model(self, title: str, content: str) -> bool:
+    def update_object(self, title: str, content: str) -> bool:
         try:
             if title:
                 self.title = title
@@ -77,7 +77,7 @@ class Note(models.Model):
             )
             return False
 
-    def delete_model(self) -> bool:
+    def delete_object(self) -> bool:
         try:
             self.is_active = False
             self.deleted_at = timezone.now()
