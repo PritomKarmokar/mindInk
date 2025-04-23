@@ -60,6 +60,12 @@ class Note(models.Model):
         verbose_name_plural = "Notes List"
         db_table = "notes"
 
+        constraints = [
+            models.UniqueConstraint(
+                fields=["user", "title"], name="unique_note_title_per_user"
+            )
+        ]
+
     def update_object(self, title: str, content: str) -> bool:
         try:
             if title:
