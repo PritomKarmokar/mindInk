@@ -68,7 +68,7 @@ python manage.py test
 | PUT    | `/<note_id>/`    | Update a note            |
 | DELETE | `/<note_id>/`    | Delete a note            |
 
-> ⚠️ All endpoints require::
+> ⚠️ All endpoints require:
 ```makefile
 Authorization: Bearer <access_token>
 ```
@@ -78,7 +78,7 @@ Authorization: Bearer <access_token>
 docker compose up --build
 ```
 - **Run Migrations & Superuser**
-- Open another terminal and run the below commands:
+  - Open another terminal and run the below commands:
 ```bash
 docker exec -it mindInk python manage.py migrate
 docker exec -it mindInk python manage.py createsuperuser
