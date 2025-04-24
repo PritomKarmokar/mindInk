@@ -77,8 +77,7 @@ Authorization: Bearer <access_token>
 ```bash
 docker compose up --build
 ```
-- **Run Migrations & Superuser**
-  - Open another terminal and run the below commands:
+- **Run Migrations & Superuser** (Open another terminal and run the below commands)
 ```bash
 docker exec -it mindInk python manage.py migrate
 docker exec -it mindInk python manage.py createsuperuser
