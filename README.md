@@ -1,17 +1,22 @@
 # 🧠 MindInk
-MindInk is a Django-based REST API that allows users to manage personal notes with secure JWT-based authentication. It includes user signup/login/logout, password reset, and CRUD functionality for notes.
+- MindInk is a Django-based REST API for managing personal notes with secure JWT authentication. 
+- It includes user registration, login/logout, password reset, and full CRUD operations for notes. Dockerized with PostgreSQL for easy deployment.
+
+---
 
 ## 🚀 Features
 
-- User Registration & Login, Logout with JWT
-- Password Reset
-- Notes CRUD API (Create, Read, Update, Delete)
-- Unit Tests
-- Dockerized setup with PostgreSQL
+- 🔐 JWT Authentication (Signup, Login, Logout)
+- 🔁 Password Reset (Request & Change)
+- 📝 Notes CRUD (Create, Read, Update, Delete)
+- 🧪 Unit Testing
+- 🐳 Dockerized with PostgreSQL
 
 ---
-## 🛠️ Installation
-1.  **Clone the repository**
+
+## ⚙️ Local Setup
+
+1. **Clone & Navigate**
 ```bash
 git clone git@github.com:PritomKarmokar/mindInk.git
 cd mindInk
@@ -19,28 +24,26 @@ cd mindInk
 2. **Copy `.env.example` to `.env`**
 ```bash
 cp .env.example .env
+# Update `.env` with DB credentials & secret key
 ```
-- 📌 Make sure to update the .env file with the correct values
 3. **Create & Activate a Virtual Environment**
 ```bash
 python -m venv venv
 source venv/bin/activate  # On Windows: venv\Scripts\activate
 ```
-4.  **Install Dependencies**
+4. **Install Dependencies**
 ```bash
 pip install -r requirements.txt 
 ```
-5. **Setup the Database**
+5. **Database & Server**
 ```bash
 python manage.py migrate
+python manage.py runserver
 ```
-6. **Create Superuser(optional)**
+6. **(Optional) Create Admin & Run Tests**
 ```bash
 python manage.py createsuperuser
-```
-7. **Run the development server**
-```bash
-python manage.py runserver
+python manage.py test
 ```
 ## 🔐 Auth API Endpoints (JWT)
 
@@ -65,7 +68,22 @@ python manage.py runserver
 | PUT    | `/<note_id>/`    | Update a note            |
 | DELETE | `/<note_id>/`    | Delete a note            |
 
-> ⚠️ All notes endpoints require JWT in the Authorization header:
+> ⚠️ All endpoints require::
 ```makefile
 Authorization: Bearer <access_token>
+```
+## 🐳 Docker Setup
+- **Build & Run**
+```bash
+docker compose up --build
+```
+- **Run Migrations & Superuser**
+- Open another terminal and run the below commands:
+```bash
+docker exec -it mindInk python manage.py migrate
+docker exec -it mindInk python manage.py createsuperuser
+```
+-  **Run Tests**
+```bash
+docker exec -it mindInk python manage.py test
 ```
