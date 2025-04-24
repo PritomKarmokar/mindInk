@@ -10,7 +10,7 @@ MindInk is a Django-based REST API that allows users to manage personal notes wi
 - Dockerized setup with PostgreSQL
 
 ---
-##🛠️ Installation
+## 🛠️ Installation
 1.  **Clone the repository**
 ```bash
 git clone git@github.com:PritomKarmokar/mindInk.git
