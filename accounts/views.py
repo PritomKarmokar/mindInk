@@ -64,7 +64,7 @@ class LogInAPIView(APIView):
 
                 return Response(data=response, status=status.HTTP_200_OK)
             else:
-                Response(
+                return Response(
                     data={"message": "Invalid credentials"},
                     status=status.HTTP_400_BAD_REQUEST,
                 )
